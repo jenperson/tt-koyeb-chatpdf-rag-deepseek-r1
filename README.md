@@ -16,21 +16,31 @@
 
 Follow the steps below to set up and run the application:
 
-### 1. Clone the Repository
+### 1. Request access to Tenstorrent on Koyeb
+
+Get the details on the private preview of Tenstorrent on Koyeb in [this blog](https://www.koyeb.com/blog/tenstorrent-cloud-instances-unveiling-next-gen-ai-accelerators).
+Request access to the preview [here](https://tally.so/r/npRak8). I'm the one who approves access, so be sure to give a good reason for using it or your request will be rejected.
+
+### 2. Deploy a vLLM inference server to a Tenstorrent instance
+
+Use the **Deploy to Koyeb** button in [this README](https://github.com/koyeb/tenstorrent-examples/tree/main/tt-models#readme) to deploy  `deepseek-ai/DeepSeek-R1-Distill-Llama-8b`
+on a vLLM inference server.
+
+### 3. Clone the Repository
 
 ```bash
 git clone https://github.com/paquino11/chatpdf-rag-deepseek-r1.git
 cd chatpdf-rag-deepseek-r1
 ```
 
-### 2. Create a Virtual Environment
+### 4. Create a Virtual Environment
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
 
-### 3. Install Dependencies
+### 5. Install Dependencies
 
 Install the required Python packages:
 
@@ -48,16 +58,25 @@ langchain_community
 streamlit-chat
 pypdf
 chromadb
+sentence-transformers
+openai
 ```
 
-### 4. Pull Required Models for Ollama
+### 7. Pull Required Models for Ollama
 
-To use the specified embedding and LLM models (`mxbai-embed-large` and `deepseek-r1`), download them via the `ollama` CLI:
+To use the specified embedding model (`mxbai-embed-large`), download it via the `ollama` CLI:
 
 ```bash
 ollama pull mxbai-embed-large
-ollama pull deepseek-r1:latest
 ```
+
+### 8. Create .env file
+
+At the root of your project, create a .env file and add your OpenAI API key and the URL for your deployed web service on Koyeb:
+
+OPENAI_API_KEY=<YOUR_API_KEY>
+DEEPSEEK_API_URL=https://<YOUR_SERVICE_URL>.koyeb.app/v1
+
 
 ---
 
@@ -160,12 +179,14 @@ You can modify the following parameters in `rag.py` to suit your needs:
 
 ## License
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+This project is licensed under the Apache License 2.0. See the `LICENSE` file for details.
 
 ---
 
 ## Acknowledgments
 
+- [Tenstorrent](https://github.com/tenstorrent)
+- [Koyeb](https://github.com/koyeb)
 - [LangChain](https://github.com/hwchase17/langchain)
 - [Streamlit](https://github.com/streamlit/streamlit)
 - [Ollama](https://ollama.ai/)

@@ -1,13 +1,15 @@
-# rag.py
 from langchain_core.globals import set_verbose, set_debug
-from langchain_ollama import ChatOllama, OllamaEmbeddings
+from langchain_ollama import ChatOllama, OllamaEmbeddings  # Keeping Ollama Embeddings
 from langchain.schema.output_parser import StrOutputParser
 from langchain_community.vectorstores import Chroma
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema.runnable import RunnablePassthrough
 from langchain_community.vectorstores.utils import filter_complex_metadata
+from dotenv import load_dotenv
+from openai import OpenAI
 from langchain_core.prompts import ChatPromptTemplate
+import os
 import logging
 
 set_debug(True)
@@ -16,16 +18,48 @@ set_verbose(True)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+load_dotenv()
+api_key = os.getenv("OPENAI_API_KEY")
+
+DEEPSEEK_API_URL = os.getenv("DEEPSEEK_API_URL")
+
+class DeepSeekLLM:
+    """
+    Use the DeepSeek model served from Koyeb
+    """
+    def __init__(self, api_url: str = f"{DEEPSEEK_API_URL}", model: str = "DeepSeek-R1-Distill-Llama-8B"):
+        self.client = OpenAI(
+            api_key=api_key,
+            base_url=api_url,
+        )
+        self.model = model
+
+    def invoke(self, formatted_input: str, role: str = "user"):
+        """Send a request to the OpenAI API and return the response."""
+        if not isinstance(formatted_input, str):
+            formatted_input = formatted_input.to_string()
+
+        try:
+            response = self.client.chat.completions.create(
+                messages=[{"role": role, "content": formatted_input}],
+                model=f"/models/{self.model}",
+                max_tokens=500,
+            )
+
+            return response.choices[0].message.content if response.choices else None
+        except Exception as e:
+            print(f"Request failed: {e}")
+            return None
 
 class ChatPDF:
     """A class for handling PDF ingestion and question answering using RAG."""
 
-    def __init__(self, llm_model: str = "deepseek-r1:latest", embedding_model: str = "mxbai-embed-large"):
+    def __init__(self, embedding_model: str = "mxbai-embed-large"):
         """
         Initialize the ChatPDF instance with an LLM and embedding model.
         """
-        self.model = ChatOllama(model=llm_model)
-        self.embeddings = OllamaEmbeddings(model=embedding_model)
+        self.model = DeepSeekLLM()        
+        self.embeddings = OllamaEmbeddings(model=embedding_model)  # Keeping Ollama embeddings
         self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=1024, chunk_overlap=100)
         self.prompt = ChatPromptTemplate.from_template(
             """
@@ -86,11 +120,11 @@ class ChatPDF:
         chain = (
             RunnablePassthrough()  # Passes the input as-is
             | self.prompt           # Formats the input for the LLM
-            | self.model            # Queries the LLM
+            | self.model.invoke      # Queries the DeepSeek API
             | StrOutputParser()     # Parses the LLM's output
         )
 
-        logger.info("Generating response using the LLM.")
+        logger.info("Generating response using the DeepSeek LLM.")
         return chain.invoke(formatted_input)
 
     def clear(self):
