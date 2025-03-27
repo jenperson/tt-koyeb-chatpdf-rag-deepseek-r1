@@ -1,0 +1,11 @@
+@font-face {
+    font-family: 'Degular';
+    src: url('https://your-hosted-font-url/Degular.woff2') format('woff2'),
+         url('https://your-hosted-font-url/Degular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+html, body, .stApp {
+    font-family: 'Degular', sans-serif;
+}

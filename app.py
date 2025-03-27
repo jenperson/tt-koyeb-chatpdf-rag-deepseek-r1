@@ -8,6 +8,9 @@ from rag import ChatPDF
 
 st.set_page_config(page_title="RAG with Local DeepSeek R1")
 
+with open("style.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
 
 def display_messages():
     """Display the chat history."""
@@ -33,6 +36,7 @@ def process_input():
 
         st.session_state["messages"].append((user_text, True))
         st.session_state["messages"].append((agent_text, False))
+    st.session_state["user_input"] = ""
 
 
 def read_and_save_file():
