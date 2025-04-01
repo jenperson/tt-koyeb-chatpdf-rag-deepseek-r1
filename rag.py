@@ -34,7 +34,7 @@ class DeepSeekLLM:
         )
         self.model = model
 
-    def invoke(self, formatted_input: str, role: str = "user"):
+    def invoke(self, formatted_input: str, temperature: float = 1.0,  max_tokens: int = 500, role: str = "user"):
         """Send a request to the OpenAI API and return the response."""
         if not isinstance(formatted_input, str):
             formatted_input = formatted_input.to_string()
@@ -43,7 +43,8 @@ class DeepSeekLLM:
             response = self.client.chat.completions.create(
                 messages=[{"role": role, "content": formatted_input}],
                 model=f"/models/{self.model}",
-                max_tokens=500,
+                max_tokens=max_tokens,
+                temperature=temperature
             )
 
             return response.choices[0].message.content if response.choices else None
@@ -92,7 +93,7 @@ class ChatPDF:
         )
         logger.info("Ingestion completed. Document embeddings stored successfully.")
 
-    def ask(self, query: str, k: int = 5, score_threshold: float = 0.2):
+    def ask(self, query: str, k: int = 5, score_threshold: float = 0.2, temperature: float = 1.0, max_tokens: int = 500):
         """
         Answer a query using the RAG pipeline.
         """
@@ -125,7 +126,7 @@ class ChatPDF:
         )
 
         logger.info("Generating response using the DeepSeek LLM.")
-        return chain.invoke(formatted_input)
+        return chain.invoke(formatted_input, temperature=temperature, max_tokens=max_tokens)
 
     def clear(self):
         """

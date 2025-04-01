@@ -101,11 +101,6 @@ streamlit run app.py
 - Type your question in the chat input box and press Enter.
 - Adjust retrieval settings (`k` and similarity threshold) in the **Settings** section for better responses.
 
-### 4. Clear Chat and Reset
-
-- Use the **Clear Chat** button to reset the chat interface.
-- Clearing the chat also resets the vector store and retriever.
-
 ---
 
 ## Project Structure
